@@ -3,7 +3,6 @@ readFile = file.read()
 content = readFile.split('\n')
 
 #--- Part One ---
-
 newList = content.copy()
 while len(newList) > 0:
 	firstNum = int(newList[0])
