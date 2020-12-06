@@ -1,0 +1,41 @@
+import re
+
+file = open('passwordInput.txt')
+readFile = file.read()
+content = readFile.split('\n')
+
+#--- Part One ---
+passwordRegex = re.compile(r'(\d+)-(\d+)\s(\w):\s(\w+)')
+validPassword = 0
+for i in range(len(content)):
+	countWords = {}
+	details = passwordRegex.search(content[i])
+	minNum = details.group(1)
+	maxNum = details.group(2)
+	mustWord = details.group(3)
+	password = details.group(4)
+	for j in range(len(password)):
+		countWords.setdefault(password[j],0)
+		countWords[password[j]] += 1
+	if mustWord in countWords:
+		if countWords[mustWord] >= int(minNum):
+			if countWords[mustWord] <= int(maxNum):
+				validPassword += 1
+
+print(validPassword)
+
+#--- Part Two ---
+validPassword2 = 0
+for i in range(len(content)):
+	details = passwordRegex.search(content[i])
+	firstPos = int(details.group(1))-1
+	secondPos = int(details.group(2))-1
+	mustWord = details.group(3)
+	password = details.group(4)
+	if mustWord == password[firstPos] or mustWord == password[secondPos]:
+		if password[firstPos] != password[secondPos]:
+			validPassword2 += 1	
+
+print(validPassword2)
+
+file.close()
