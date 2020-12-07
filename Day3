@@ -1,0 +1,57 @@
+import math
+
+file = open('day3.txt')
+readFile = file.read()
+data = readFile.split('\n')
+
+lengthData = len(data)
+lengthLine = len(data[0])
+
+#--- Part One ---
+rightMovement = 3
+tree = 0
+index = 0
+for i in range(0,lengthLine):
+	if data[i][index] == '#':
+		tree += 1
+	index += rightMovement
+	if index > lengthLine:
+		stopLine = i+1
+		break
+
+for i in range(stopLine,lengthData):
+	#add one in case the index number (from 0) equals the length of line (from 1) 
+	multiple = math.ceil(index/lengthLine)+1 
+	newLine = data[i]*multiple
+	if newLine[index] == '#':
+		tree += 1
+	index += rightMovement
+
+print(tree)
+
+#--- Part Two --- 
+def move(x,y):
+	tree = 0
+	startX = 0
+	startY = 0
+	while (startY + y) < lengthData:
+		startX += x
+		startX %= 31 #Keep position on the slope of width = 31
+		startY += y
+		if data[startY][startX] == '#':
+			tree += 1
+	return tree
+
+options = [(1,1),(3,1),(5,1),(7,1),(1,2)]
+
+results = []
+
+for option in options:
+	results.append(move(option[0],option[1]))
+
+multiply = 1
+for result in results:
+	multiply = multiply*result
+print(multiply)
+
+file.close()
