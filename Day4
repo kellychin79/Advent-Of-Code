@@ -1,0 +1,92 @@
+file = open('day4.txt')
+readFile = file.read()
+data = readFile.split('\n\n')
+
+#--- Part One ---
+validCount = 0
+
+for i in range(len(data)):
+	data[i] = ' '.join(data[i].split('\n')).split(' ') #see the logic at the bottom
+	if len(data[i]) == 8:
+		validCount += 1 #every field is presented, valid
+	elif len(data[i]) < 7:
+		continue #more than 2 fields missing, invalid, move to the next one
+	else:
+		nonCid = 0
+		for j in data[i]:
+			if j[0:3] != 'cid':
+				nonCid += 1		
+		if nonCid == 7:
+			validCount += 1 #only field cid missing, valid
+
+print(validCount)
+
+#--- Part Two --- 
+validCount = 0
+hclLetters = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']
+eclOptions = ['amb','blu','brn','gry','grn','hzl','oth']
+
+def verify(passed):
+	passport = {'byr':None,'iyr':None,'eyr':None,'hgt':None,'hcl':None,'ecl':None,'pid':None,'cid':None}
+	for i in range(len(passed)):
+	 	fieldName = passed[i][0:3]
+	 	info = passed[i][4:]
+	 	passport[fieldName] = info
+	count = 0
+	#to validate byr
+	if int(passport['byr']) >= 1920 and int(passport['byr']) <= 2002:
+		count += 1
+	#to validate iyr
+	if int(passport['iyr']) >= 2010 and int(passport['iyr']) <= 2020:
+		count += 1		
+	#to validate eyr
+	if int(passport['eyr']) >= 2020 and int(passport['eyr']) <= 2030:
+		count += 1
+	 #to validate hgt
+	if passport['hgt'][-2:] == 'cm':
+		if int(passport['hgt'][:-2]) >= 150 and int(passport['hgt'][:-2]) <= 193: 
+			count += 1
+	if passport['hgt'][-2:] == 'in':
+		if int(passport['hgt'][:-2]) >= 59 and int(passport['hgt'][:-2]) <= 76: 
+			count += 1
+	#to validate hcl
+	validChar = 0
+	if len(passport['hcl']) == 7: 
+		if passport['hcl'][0] == '#':
+			for i in range(6):
+				if passport['hcl'][i+1] in hclLetters:
+					validChar += 1
+	if validChar == 6:
+		count += 1
+	#to validate ecl
+	if passport['ecl'] in eclOptions:
+		count += 1
+	#to validate pid
+	if passport['pid'].isdigit():
+		if len(passport['pid']) == 9:
+			count += 1
+	#make a conclusion
+	if count >= 7:
+		return 'verified'
+	else:
+		return 'failed'
+
+
+for i in range(len(data)):
+	if len(data[i]) == 8:
+		if verify(data[i]) == 'verified':
+			validCount += 1 #every field is presented, valid
+	elif len(data[i]) < 7:
+		continue #more than 2 fields missing, invalid, move to the next one
+	else:
+		nonCid = 0
+		for j in data[i]:
+			if j[0:3] != 'cid':
+				nonCid += 1		
+		if nonCid == 7:
+			if verify(data[i]) == 'verified':
+				validCount += 1 #only field cid missing, valid
+
+print(validCount)
+
+file.close()
