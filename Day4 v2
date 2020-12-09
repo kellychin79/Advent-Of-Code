@@ -1,0 +1,58 @@
+import re
+
+file = open('day4.txt')
+readFile = file.read()
+data = readFile.split('\n\n')
+
+#-----Part 1-----
+# validCount = 0
+
+# for i in data:
+#   if 'byr' in i and 'iyr' in i and 'hgt' in i and 'eyr' in i and 'ecl' in i and 'pid' in i and 'hcl' in i:
+#     validCount += 1
+
+# print(validCount)
+
+#--- Part Two--- 
+validCount = 0
+
+def verify(passed_data):
+	passport = {}
+	for i in passed_data:
+	 	key, value = i.split(':')
+	 	passport[key] = value
+	count = 0
+	#to validate byr
+	if 1920 <= int(passport['byr']) <= 2002:
+		count += 1
+	#to validate iyr
+	if 2010 <= int(passport['iyr']) <= 2020:
+		count += 1		
+	#to validate eyr
+	if 2020 <= int(passport['eyr']) <= 2030:
+		count += 1
+	 #to validate hgt
+	if (passport['hgt'][-2:] == 'cm' and 150 <= int(passport['hgt'][:-2]) <= 193) or (passport['hgt'][-2:] == 'in' and 59 <= int(passport['hgt'][:-2]) <= 76): 
+		count += 1
+	#to validate hcl
+	if re.fullmatch(r'#[0-9a-f]{6}',passport['hcl']):
+		count += 1
+	#to validate ecl
+	if passport['ecl'] in ('amb','blu','brn','gry','grn','hzl','oth'):
+		count += 1
+	#to validate pid
+	if re.fullmatch(r'[0-9]{9}',passport['pid']):
+		count += 1
+	#make a conclusion
+	if count >= 7:
+		return True
+
+for i in data:
+	if 'byr' in i and 'iyr' in i and 'hgt' in i and 'eyr' in i and 'ecl' in i and 'pid' in i and 'hcl' in i:
+		newData = i.split()
+		if verify(newData):
+			validCount += 1 #only field cid missing, valid
+
+print(validCount)
+
+file.close()
