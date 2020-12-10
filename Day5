@@ -1,0 +1,50 @@
+file = open('day5.txt')
+data = file.readlines()
+
+#--- Part One ---
+
+def findRow(passed):
+	rangeRow = []
+	for i in range(128):
+		rangeRow.append(i)	
+	for i in passed:
+		if i == 'F':
+			rangeRow = rangeRow[:int(len(rangeRow)/2)]
+		elif i == 'B':
+			rangeRow = rangeRow[int(len(rangeRow)/2):]
+	return rangeRow
+
+def findCol(passed):
+	rangeCol = []
+	for i in range(8):
+		rangeCol.append(i)
+	for i in passed:
+		if i == 'L':
+			rangeCol = rangeCol[:int(len(rangeCol)/2)]
+		elif i == 'R':
+			rangeCol = rangeCol[int(len(rangeCol)/2):]
+	return rangeCol
+
+allseatIDs = []
+seatHighID = 0
+for i in data:
+	row = findRow(i[0:7])
+	col = findCol(i[7:10])
+	seatID = int(row[0]) * 8 + col[0]
+	allseatIDs.append(seatID)
+	if seatID > seatHighID:
+		seatHighID = seatID
+
+print(seatHighID)
+
+#--- Part Two --- 
+#the seat with lowest seat ID
+x = 0*8 + 0
+#the seat with highest seat ID
+y = 127*8 + 7
+#to match from all seat IDs
+for i in range(x,y):
+	if (i-1 in allseatIDs) and (i+1 in allseatIDs) and (i not in allseatIDs):
+		print(i)
+
+file.close()
