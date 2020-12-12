@@ -1,0 +1,38 @@
+file = open('day6.txt')
+data = file.read().split('\n\n')
+
+#--- Part One ---
+sumYes = 0
+for group in data:
+	uniqueYes = 0
+	uniqueAns =['\n']
+	for i in group:
+		if i not in uniqueAns:
+			uniqueAns.append(i)
+			uniqueYes += 1
+	sumYes += uniqueYes
+
+print(sumYes)
+
+#--- Part Two --- 
+sumCommonYes = 0
+for group in data:
+	commonAns = []
+	commonYes = 0
+	if group.count('\n') == 0:
+		for i in group:
+			commonAns.append(i)
+			commonYes += 1
+	else:	
+		person = group.split('\n')
+		print(group)
+		for i in person[0]:
+			letterCount = group.count(i)
+			if letterCount == group.count('\n')+1:
+				commonYes += 1
+	sumCommonYes += commonYes
+	print(sumCommonYes)
+
+print(sumCommonYes)
+
+file.close()
