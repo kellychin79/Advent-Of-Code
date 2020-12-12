@@ -1,0 +1,64 @@
+file = open('day7.txt', 'r')
+fileContents = [rule.strip() for rule in file.readlines()]
+
+#Preprocsessing
+
+"""create a dictionary such that it looks like this:
+{ 'shinygold': {'1': 'darkolive', '2': 'vibrantplum'},
+  'darkolive': {'3': 'fadedblue', '4': 'dottedblack'}}"""
+bagRules = {}
+for line in fileContents:
+    # array of words
+    halves = line.strip().split("contain")
+    outerBagName = halves[0].replace(' ', '')[:-4]
+    outerBagContents = halves[1].strip().split(', ')
+    innerBags = {}
+    for content in outerBagContents:
+        content = content.strip().replace('.', '')
+        if content != "no other bags":
+            contentArray = content.strip().split(' ')
+            contentQuantity = contentArray[0]
+            contentName = contentArray[1] + contentArray[2]
+            innerBags[contentName] = contentQuantity
+    bagRules[outerBagName] = innerBags
+
+#----Part One----(Refer to other's solution)
+def outerSearch(outer, searched_bag):
+    #print("Searching: ", outer)
+    inners = [c for c in bagRules[outer].keys()]
+    #print("Inner bags: ", inners)
+    if inners:
+        for inner in inners:
+            #print("\tChecking inner bag: ", inner)
+            if inner == searched_bag:
+                #print("\t\tMatch! ")
+                return True
+            else:
+                #print("\t\t\tNo match, calling outerSearch on ", inner)
+                if outerSearch(inner, searched_bag):
+                    return True
+
+def checkBag(searched_bag):  
+    bags = [] #a list of bags that will eventually contain shinygold 
+    for outer in bagRules:
+        if outerSearch(outer, searched_bag):
+            bags.append(outer)
+    print(len(bags))
+    
+#checkBag("shinygold")
+
+#-----Part Two-----(Refer to other's solution)
+innersArray = []
+def getInners(searched_bag):
+    inners = bagRules[searched_bag]
+    #print(inners)
+    for inner, qty in inners.items():
+        #print('Inner bag and the qty: '+inner+' '+str(qty))
+        for i in range(int(qty)): #no matter the total qty of inner bag, we go deeper by each unit
+            #print('going through '+inner+' qty '+str(i))
+            innersArray.append(item for item in getInners(inner)) #item is 1 (one time)
+            #print('after appending, innerArray length '+str(len(innersArray)))
+    return innersArray
+    #print('before appending after searching, innerArray length is :'+str(len(innersArray)))
+
+print(len(getInners("shinygold")))
