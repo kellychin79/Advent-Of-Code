@@ -1,0 +1,48 @@
+file = open('day9.txt')
+data = file.read().split('\n')
+dataLen = len(data)
+
+#-----Part One-----
+def checkSum(index,theSum):
+    matchList =[]
+    for i in range(index-25,index):
+        matchList.append(data[i])
+    x = 0
+    for firstNum in matchList:
+        if str(theSum-int(firstNum)) in matchList:
+            break
+        else:
+            x+=1
+    if x == 25:
+        return 'fail'
+
+for i in range(25,dataLen):
+    theSum = int(data[i])
+    if checkSum(i,theSum) == 'fail':
+        theNum = int(data[i])
+        print('The number that fails the rule is '+data[i])
+        break
+
+#-----Part Two-----
+def findContiguous(goal,currentSum,index):
+    newSum = currentSum+int(data[index])
+    if newSum < goal:
+        findContiguous(goal,newSum, index+1)
+    elif newSum == goal and currentSum != 0:
+        print('Goal: %s, first index %s:, %s, last index %s: %s' %(goal,i,data[i],index,data[index]))
+        findMinMax(i,index)
+
+def findMinMax(first,last):
+    contiguousList = []
+    for i in range(first,last+1):
+        contiguousList.append(int(data[i]))
+    minNum = min(contiguousList)
+    maxNum = max(contiguousList)
+    print('The encrption weakness is '+str(minNum+maxNum))
+
+
+for i in range(dataLen):
+    findContiguous(theNum,0,i)
+
+
+file.close()
