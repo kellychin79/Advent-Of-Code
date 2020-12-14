@@ -1,0 +1,56 @@
+file = open('day8.txt')
+data = file.readlines()
+dataLen = len(data)
+
+#-----Part One-----
+
+x=0
+acc=0
+position=[]
+while position.count(x) < 2:
+    if data[x][0:3] == 'nop':
+        # acc += int(data[x][4:])
+        x += 1
+    elif data[x][0:3] == 'jmp':
+        x += int(data[x][4:])
+    elif data[x][0:3] == 'acc':
+        acc += int(data[x][4:])
+        x += 1
+    position.append(x)
+
+print(acc)
+
+# #-----Part Two-----
+
+def run(index,change):
+    x=0
+    acc=0
+    position=[]
+    while position.count(x) < 2:
+        if x == index:
+            if change == 'jmp':
+                x += int(data[x][4:])
+            elif change == 'nop':
+                x += 1            
+        elif x != index:
+            if data[x][0:3] == 'jmp':
+                x += int(data[x][4:])
+            elif data[x][0:3] == 'nop':
+                x += 1
+            elif data[x][0:3] == 'acc':
+                acc += int(data[x][4:])
+                x += 1
+        if x == dataLen:
+            print('Accumulator is '+str(acc))
+            break
+        else:
+            position.append(x)
+
+for i in range(dataLen):
+    if data[i][0:3] == 'jmp':
+        run(i,'nop')
+    elif data[i][0:3] == 'nop':
+        run(i,'jmp')
+
+
+file.close()
