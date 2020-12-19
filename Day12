@@ -1,0 +1,92 @@
+import time
+STARTTIME = time.time()
+
+file = open('day12.txt')
+data = [x.rstrip() for x in file.readlines()]
+
+#-----Part One-----
+def move(passed_dir,x,y):
+	if passed_dir == 'N':
+		y += values
+	elif passed_dir == 'S':
+		y -= values
+	elif passed_dir == 'W':
+		x -= values
+	elif passed_dir == 'E':
+		x += values 
+	return x,y
+
+def changeDir(action,values,currentDeg):
+	degree = {0:'N',180:'S',270:'W',90:'E'}
+	if action == 'L':
+		newDeg = currentDeg-values
+		newDir = degree[newDeg%360]
+	elif action == 'R':
+		newDeg = currentDeg+values
+		newDir = degree[newDeg%360]
+	return newDir, newDeg
+
+x, y = (0,0) #starting position
+direction, currentDeg = ('E',90)
+for i in data:
+	action = i[0]
+	values = int(i[1:])
+	if action == 'F':
+		x, y = move(direction,x,y)
+	elif action in ('L', 'R'):
+		direction, currentDeg = changeDir(action,values,currentDeg)
+	else:
+		x, y = move(action,x,y)
+
+print('the distance between the location and starting pos is '+str(abs(x)+abs(y)))
+
+#-----Part Two-----
+def fMove(x,y,values,wp):	
+	y += values*wp['NS']
+	x += values*wp['WE']
+	return x,y
+
+def waypointMove(action,values,wp):	
+	if action == 'N':
+		wp['NS'] += values
+	elif action == 'S':
+		wp['NS'] -= values
+	elif action == 'W':
+		wp['WE'] -= values
+	elif action == 'E':
+		wp['WE'] += values
+	return wp
+
+def rotate(values,wp):
+	ns, we = wp['NS'], wp['WE']
+	if values%360 == 180:
+		wp['NS'] = -ns
+		wp['WE'] = -we
+	elif values%360 == 270:
+		wp['NS'] =  we
+		wp['WE'] = -ns
+	elif values%360 == 90:
+		wp['NS'] = -we
+		wp['WE'] =  ns
+	return wp
+
+
+#starting position and waypoint details
+x, y = (0,0) 
+waypoint ={'NS':1,'WE':10}
+for i in data:
+	action = i[0]
+	values = int(i[1:])
+	if action == 'F':
+		x, y = fMove(x,y,values,waypoint)
+	elif action in ('L', 'R'):
+		if action == 'L':
+			values = -values
+		#treat everything with clockwise rotate(R)
+		waypoint = rotate(values,waypoint)
+	else:
+		waypoint = waypointMove(action,values,waypoint)
+
+print('the distance between the location and starting pos is '+str(abs(x)+abs(y)))
+
+print("Elapsed time: "+str(round(time.time()-STARTTIME,4)))
