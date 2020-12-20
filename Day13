@@ -1,0 +1,61 @@
+import time
+import math
+STARTTIME = time.time()
+
+file = open('day13.txt')
+data = [x.rstrip() for x in file.readlines()]
+allbuses = data[1].split(',')
+#-----Part One-----
+earliest = int(data[0])
+buses = []
+for i in allbuses:
+	if i != 'x':
+		buses.append(i)
+arrivalTime = []
+for i in buses:
+	x = earliest/int(i)
+	y = earliest%int(i)
+	if y != 0:
+		arrivalTime.append(math.ceil(x)*int(i))
+
+bus = buses[arrivalTime.index(min(arrivalTime))]
+waiting = min(arrivalTime)-earliest
+print('answer is '+str(int(bus)*waiting))
+
+#-----Part Two-----
+#My solution worked but took 35sec for the example 1202161486. Not mention how long it will take for more than trillions run.
+ans=0
+while ans>=0:
+	match=0
+	for i in range(len(allbuses)):
+		if allbuses[i] == 'x':
+			match+=1
+			continue
+		if (ans+i)%int(allbuses[i])==0:
+			match+=1
+	if match == len(allbuses):
+		break
+	ans+=int(allbuses[0])
+
+print(ans)
+
+#-----other's Part Two Solution-----
+#Only took 0.002 sec
+t, step = 0, 1
+
+# grab all bus id's and time offset using tuple
+#[(19, 0), (37, 13), (599, 19), (29, 21), (17, 36), (23, 42), (761, 50), (41, 60), (13, 63)]
+p2 = [(int(i), j) for j, i in enumerate(allbuses) if i != 'x']
+
+# iterate through buses
+for bus_id, mins in p2:
+    # check to see if bus is departing at current time
+    while (t + mins) % bus_id != 0:
+        t += step
+    # increase step multiple for the current accumlated buses sets for the purpose of finding next min for next bus
+    step *= bus_id
+
+print(f'Part 2: {t}')
+
+
+print("Elapsed time: "+str(round(time.time()-STARTTIME,4)))
