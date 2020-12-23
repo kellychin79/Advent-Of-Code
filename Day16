@@ -1,0 +1,111 @@
+import time
+import re
+from collections import defaultdict
+STARTTIME = time.time()
+
+file = open('day16.txt')
+# split the file content into 3 groups - rules, my ticket, other tickets
+data = [i.split('\n') for i in file.read().split('\n\n')]
+
+#Regex Option 1
+#ruleRegex = re.compile(r'(\d+)-(\d+)')
+#rule = ruleRegex.findall(data)
+
+#Regex Option 2
+ruleString = ''.join(data[0])
+ruleNum = re.findall(r'(\d+)-(\d+)',ruleString)
+rangeValue = set()
+for i in ruleNum:
+	for j in range(int(i[0]),int(i[1])+1):
+		rangeValue.add(j)
+
+# other tickets are in the 3rd group, except for the index 1 'nearby tickets:'
+ticketsString = ' '.join(data[2][1:])
+# watch out the pattern, I previously set it as (\d+(,\d+),\d+)
+tickets = re.findall(r'(\d+(,\d+)+)',ticketsString)
+
+#-----Part One-----
+error_list =[]
+for i in tickets:
+	for j in i[0].split(','):
+		if int(j) not in rangeValue:
+			error_list.append(int(j))
+
+print('Part Two answer is '+str(sum(error_list)))
+
+#-----Part Two-----
+valid_list=[]
+for i in tickets:
+	valid = True
+	for j in i[0].split(','):
+		if int(j) not in rangeValue:
+				valid = False
+				break
+	if valid:
+		valid_list.append(i[0])
+
+# create the empty sets corresponding to the length of the ticket
+numbersPerUnit = [set() for i in range(len(valid_list[0].split(',')))] 
+# collect the number at the same index of one ticket to the same list
+for ticket in valid_list:
+	for i in range(len(valid_list[0].split(','))):
+		numbersPerUnit[i].add(int(ticket.split(',')[i]))
+
+# convert the rules into a useable format - condition sets
+rulesRaw =[]
+for i in data[0]:
+	rulesRaw.append(re.findall(r'^(\w* *\w*): ([0-9]+-[0-9]+) or ([0-9]+-[0-9]+)',i))
+
+# iterate over each main rule and define it and its two value ranges as lists
+ruleNameNum = {}
+for i in range(len(rulesRaw)):
+	name = rulesRaw[i][0][0]
+	rule1 = rulesRaw[i][0][1].split('-') # the first part of value ranges
+	rule2 = rulesRaw[i][0][2].split('-') # the second part of value ranges
+
+	# iterate over each value ranges and add them to a nested set 
+	# the set looks like {'rule1':{rule1's number1,2,etc}, 'rule2':{rules2's number1,2,etc}]
+	rulesNum = set()
+	for i in range(int(rule1[0]),int(rule1[1])+1):
+		rulesNum.add(i)
+	for i in range(int(rule2[0]),int(rule2[1])+1):
+		rulesNum.add(i)
+	ruleNameNum[name] = rulesNum
+
+definiteLists = defaultdict(set)
+# repeat until all units are assigned to a name in definite list
+while len(definiteLists) < len(numbersPerUnit):
+	possibleLists = defaultdict(set)
+	# per each rule, go down one layer to the numbers per unit
+	for name, values in ruleNameNum.items():
+		# to iterate through the numbers on every unit
+		for i in range(len(numbersPerUnit)):
+			# check that the index of the unit is NOT assigned to definite list
+			if i not in definiteLists.values():
+				# check if the numbers per unit are a subset of the rule's value ranges
+				if numbersPerUnit[i].issubset(values):
+					# if it's a subset, add the rule name and the index of the unit to possible list
+					possibleLists[name].add(i)
+	#print(possibleLists) - if using the example input, the result is defaultdict(<class 'set'>, {'class': {0, 1}, 'row': {0}, 'seat': {2}})
+	
+	# check on every rule if the rule contains only one possible index of the unit
+	for name, index in possibleLists.items():
+		# if it does contain, add the name and value into definite list, remove the value from possible list
+		if len(index) == 1:
+			definiteLists[name] = index.pop()
+			# remove the rule from the list
+			del ruleNameNum[name]	
+#print(definiteLists) - if using the example input, the result is defaultdict(<class 'set'>, {'seat': 2, 'class': 1, 'row': 0})
+
+# split the data portion of my ticket (index 1 part of the data index 1 group) into a list
+myTicket = data[1][1].split(',')
+
+result=1
+for k, v in definiteLists.items():
+	if k.startswith('departure'):
+		result *= int(myTicket[v])
+
+print('Part Two answer is '+str(result))
+
+print("Elapsed time: "+str(round(time.time()-STARTTIME,4)))
+
