@@ -1,0 +1,68 @@
+import time
+from collections import defaultdict, deque
+STARTTIME = time.time()
+
+day15Text = '16,1,0,18,12,14,19'
+day15Input = [int(i) for i in day15Text.split(',')]
+
+#-----Part One/Two-----
+#with 3 inputs, the 30Kth number took 10 sec
+#with 7 inputs, the 30Kth number took 973 sec
+def findAns(round,inputs):
+	# the list of spoken numbers
+	nums = []
+	# to list each number's position when spoken 
+	dic = {}
+	for i in range(len(inputs)):
+		num = int(inputs[i])
+		nums.append(num)
+		dic[num] = []
+		dic[num].append(i)
+	for i in range(len(inputs),round):
+		# when the previous num is new
+		if nums.count(nums[i-1]) == 1:
+			if 0 not in dic:
+				dic[0] = []
+			nums.append(0)
+			dic[0].append(i)
+		# when the previuos num is already spoken
+		else:
+			previous = i-1
+			earlier = dic[nums[i-1]][-2]
+			diff = previous - earlier
+			nums.append(diff)
+			if diff in dic:
+				dic[diff].append(i)
+			else:
+				dic[diff] = []
+				dic[diff].append(i)
+		if i == round-1:
+			return nums[i]
+
+
+#--Optimzied using defaultdict, deque-- 
+#with 3 inputs, the 30Kth number took 0.03 sec, which is 333 times faster
+#with 7 inputs, the 30Kth number took 0.39 sec, which is 2,500 times faster!
+def findAns(round,inputs):
+	# to list each number's position when spoken 	
+	newlines = defaultdict(deque)
+	for k, v in enumerate(inputs):
+		newlines[v].append(k+1)
+	previous = inputs[-1]
+	for i in range(len(inputs),round):
+		#print(i)
+		# when the previous num is new
+		if len(newlines[previous]) == 1:
+			previous = 0
+			newlines[0].append(i+1)
+		# when the previuos num is already spoken
+		else:
+			previous = newlines[previous][-1] - newlines[previous][-2]
+			newlines[previous].append(i+1)
+		if i == round-1:
+			return previous
+
+print(findAns(2020,day15Input))
+print(findAns(30000000,day15Input))
+
+print("Elapsed time: "+str(round(time.time()-STARTTIME,4)))
