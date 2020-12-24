@@ -1,0 +1,73 @@
+from itertools import product
+import operator
+import time
+STARTTIME = time.time()
+
+file = open('day17.txt')
+data = file.read().split('\n')
+
+def runCycles(dimensions,data):
+    state = {}
+    currState = data
+    # one item in the list is assigned to one y-dimension
+    for y in range(0, len(currState)):
+    	# the same index of each item is assigned to the same x-dimension
+        for x in range(0, len(currState[0])):
+            p = [x,y]
+            # add z-dimension to each xy coordinate
+            for _ in range(0, dimensions-len(p)):
+                p.append(0)
+            # load state into a dictionary, such as {(0, 0, 0): '.', (1, 0, 0): '#', (2, 0, 0): '.'}
+            state[tuple(p)] = currState[y][x]
+
+    cycles = 6
+    for i in range(0,cycles):
+        # create inactive cubes at outer layer for further viewing
+        for stateCoor in list(state):     # stateCoor represents each coordinate of the current state
+            for changes in product([-1,0,1],repeat=dimensions):     # changes represents all 27 (3^3) possible cartesian products from the given iterators (-1,0,1)
+                # map function applies operator.add function to two iterables stateCoor and changes
+                newCoor = tuple(map(operator.add, stateCoor, changes))     # newCoor is the new coordinate, sumed by the x,y,z-coordinate from the stateCoor and changes
+                # if the new coordinate is not in the current state, it is at outer layer
+                if newCoor not in state:
+                    state[newCoor] = '.'
+
+        # prepare a empty dic for the next state
+        nextState = {}
+        for coor, status in state.items():            
+            # to count the active cubes among the nearby 26 cubes
+            countActive = 0
+            for changes in product([-1,0,1],repeat=dimensions):
+                nearbyCube = tuple(map(operator.add, coor, changes))
+                # don't count the cube itself
+                if coor == nearbyCube:
+                    continue
+                # if the nearby cube is not in the current state, it is definitely not active
+                if nearbyCube not in state:
+                    continue
+                # if the nearby cube is active, add 1
+                if state[nearbyCube] == '#':
+                    countActive+=1
+            
+            # apply two rules and assign the new coordinates and their status to the next state 
+            if status == '#' and (countActive == 3 or countActive == 2):
+                nextState[coor] = '#'
+            elif status == '.' and countActive == 3:
+                nextState[coor] = '#'
+            else:
+                nextState[coor] = '.'
+            
+        # assign the filled dic of the next state to the variable state
+        state = nextState    
+    # when completing the six-cycle , count the numbers of active cubes
+    print(countTotalActice(state))
+    
+def countTotalActice(state):
+    totalActive = 0
+    for coor, status in state.items():
+        if status == '#':
+            totalActive+=1    
+    return totalActive         
+
+runCycles(4,data)
+
+print("Elapsed time: "+str(round(time.time()-STARTTIME,4)))
