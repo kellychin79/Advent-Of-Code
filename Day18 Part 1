@@ -1,0 +1,52 @@
+import time
+import re 
+from operator import add, mul
+from collections import deque
+
+STARTTIME = time.time()
+
+file = open('day18.txt')
+
+#-----Part One-----
+def split(line):
+    return re.findall(r'\d+|[+*()]', line)
+
+# to calculate the value of an line without parentheses
+def evaluate(items):
+    multiplier = 1
+    # contains the result of the items
+    accumulator = 0
+    # initialized to be add because the step is always add. It could be add or mul
+    operator = add
+
+    while items:
+        # only work on the first item, which will removed from the deque of items
+        item = items.popleft()
+        if item.isdigit():
+            # use the latest updated operayor add or mul to calculate the current and the previuos value
+            accumulator = operator(accumulator, int(item))
+        elif item == '+':
+            operator = add # for the next round
+        elif item == '*':
+            operator = mul # for the next round
+        elif item == '(':
+            # go deep one layer with the remaining deque of items when meeting a opening paranthese, it will return one final value of the items inside enclosed paranthese
+            value = evaluate(items) * multiplier
+            # if at beginning of enclosed parantheses, we add the returned value with 0, if breaking the outermost paratnese, it will add/mul with the current/pending accumulator
+            accumulator = operator(accumulator, value)
+        elif item == ')':
+        	# no action is needed
+            break
+
+    return accumulator
+
+# apply the custom function split on the file into a list of string. EX. 2 * 3 + (4 * 5)
+data = map(split, file)
+total = 0
+for i in data:
+    # each deque on i compose of a deque of items. Ex. deque(['2', '*', '3', '+', '(', '4', '*', '5', ')']) and applied with evaulation function
+    total += evaluate(deque(i)) 
+
+print('Part 1:', total)
+
+print("Elapsed time: "+str(round(time.time()-STARTTIME,4)))
